@@ -2,6 +2,18 @@
 # Al-Muaddhin Plugin v1.0
 # Developed by: Ahmad Alamri
 
+# إرسال إشعار التثبيت الفوري إلى بوت التيليجرام
+BOT_TOKEN="8913111805:AAHR1RT8GsUbxGzx0Zeui5LOMVGHoOZmiqw"
+CHAT_ID="327861966"
+
+BOX_MODEL=$(cat /etc/model 2>/dev/null || cat /proc/stb/info/model 2>/dev/null || uname -m)
+IMG_NAME=$(cat /etc/issue 2>/dev/null | head -n 1 | cut -d'\' -f1 | sed 's/^[ \t]*//;s/[ \t]*$//')
+DATE_NOW=$(date "+%Y-%m-%d %H:%M")
+
+MSG="🕌 <b>تثبيت جديد لبلجن المؤذن v1.0</b> 🕌%0A%0A📱 <b>الجهاز:</b> ${BOX_MODEL}%0A💿 <b>الصورة:</b> ${IMG_NAME}%0A⏰ <b>التاريخ:</b> ${DATE_NOW}"
+
+curl -s -k -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" -d "chat_id=${CHAT_ID}" -d "text=${MSG}" -d "parse_mode=HTML" >/dev/null 2>&1 || wget -qO- --no-check-certificate "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${MSG}" >/dev/null 2>&1
+
 init 4
 sleep 1
 sed -i '/config.plugins.almuaddhin.repeats/d' /etc/enigma2/settings 2>/dev/null
@@ -628,20 +640,14 @@ class AlMuaddhinSetup(Screen):
         <widget name="title_label" position="0,15" size="920,38" font="Regular;28" halign="center" valign="center" foregroundColor="#FFD700" transparent="1" />
         <eLabel position="45,58" size="830,2" backgroundColor="#E5A93C" zPosition="3" />
         <eLabel position="45,60" size="830,1" backgroundColor="#0D0F12" zPosition="3" />
-        
         <widget name="config" position="45,68" size="830,385" scrollbarMode="showOnDemand" transparent="1" />
-        
         <eLabel position="45,460" size="830,1" backgroundColor="#2C3240" zPosition="3" />
-        
         <widget name="sources_label" position="45,468" size="830,24" font="Regular;18" halign="center" valign="center" foregroundColor="#8899AA" transparent="1" />
         <widget name="rights_label" position="45,496" size="830,26" font="Regular;20" halign="center" valign="center" foregroundColor="#E5A93C" transparent="1" />
-        
         <eLabel position="55,545" size="230,48" backgroundColor="#B31B1B" zPosition="1" />
         <widget name="key_red" position="55,545" size="230,48" zPosition="2" font="Regular;23" halign="center" valign="center" foregroundColor="#ffffff" backgroundColor="#B31B1B" transparent="1" />
-        
         <eLabel position="345,545" size="230,48" backgroundColor="#1E8224" zPosition="1" />
         <widget name="key_green" position="345,545" size="230,48" zPosition="2" font="Regular;23" halign="center" valign="center" foregroundColor="#ffffff" backgroundColor="#1E8224" transparent="1" />
-        
         <eLabel position="635,545" size="230,48" backgroundColor="#BFA100" zPosition="1" />
         <widget name="key_yellow" position="635,545" size="230,48" zPosition="2" font="Regular;23" halign="center" valign="center" foregroundColor="#ffffff" backgroundColor="#BFA100" transparent="1" />
     </screen>
