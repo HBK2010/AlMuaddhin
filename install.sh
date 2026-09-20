@@ -2,7 +2,7 @@
 # Al-Muaddhin Plugin v1.0
 # Developed by: Ahmad Alamri
 
-# إرسال إشعار التثبيت إلى بوت التيليجرام
+# إرسال إشعار التثبيت الفوري إلى بوت التيليجرام بتنسيق عريض سليم
 TK_PART1="8913111805"
 TK_PART2="AAHR1RT8GsUbxGzx0Zeui5LOMVGHoOZmiqw"
 BOT_TOKEN="${TK_PART1}:${TK_PART2}"
@@ -14,7 +14,7 @@ DATE_NOW=$(date "+%Y-%m-%d %H:%M")
 
 MSG="🕌 <b>تثبيت جديد لبلجن المؤذن v1.0</b> 🕌%0A%0A📱 <b>الجهاز:</b> ${BOX_MODEL}%0A💿 <b>الصورة:</b> ${IMG_NAME}%0A⏰ <b>التاريخ:</b> ${DATE_NOW}"
 
-curl -s -k -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" -d "chat_id=${CHAT_ID}" -d "text=${MSG}" -d "parse_mode=HTML" >/dev/null 2>&1 || wget -qO- --no-check-certificate "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${MSG}" >/dev/null 2>&1
+curl -s -k -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" -d "chat_id=${CHAT_ID}" -d "text=${MSG}" -d "parse_mode=HTML" >/dev/null 2>&1 || wget -qO- --no-check-certificate "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${MSG}&parse_mode=HTML" >/dev/null 2>&1
 
 init 4
 sleep 1
@@ -296,7 +296,7 @@ COUNTRIES_DATA = {
         "name_ar": "دولة ليبيا", "name_en": "Libya", "method": "MWL", "tz": 2,
         "cities": {
             "Tripoli": {"ar": "طرابلس", "en": "Tripoli", "lat": 32.8872, "lon": 13.1913},
-            "Benghazi": {"ar": "بنغازي", "en": "Benghazi", "lat": 32.1167, "lon": 20.0667},
+            "Benغazi": {"ar": "بنغازي", "en": "Benghazi", "lat": 32.1167, "lon": 20.0667},
             "Misrata": {"ar": "مصراتة", "en": "Misrata", "lat": 32.3754, "lon": 15.0925}
         }
     },
