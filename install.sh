@@ -296,7 +296,7 @@ COUNTRIES_DATA = {
         "name_ar": "دولة ليبيا", "name_en": "Libya", "method": "MWL", "tz": 2,
         "cities": {
             "Tripoli": {"ar": "طرابلس", "en": "Tripoli", "lat": 32.8872, "lon": 13.1913},
-            "Benغazi": {"ar": "بنغازي", "en": "Benghazi", "lat": 32.1167, "lon": 20.0667},
+            "Benghazi": {"ar": "بنغازي", "en": "Benghazi", "lat": 32.1167, "lon": 20.0667},
             "Misrata": {"ar": "مصراتة", "en": "Misrata", "lat": 32.3754, "lon": 15.0925}
         }
     },
@@ -497,9 +497,14 @@ def calc_prayers(lat, lon, tz, method="UmmAlQura", d=None):
     fajr_ang = 18.5 if method == "UmmAlQura" else (19.5 if method == "Egypt" else 18.0)
     ha_fajr = ha(fajr_ang) or 7.0
 
+    # معادلة زاوية العصر الصحيحة فوق الأفق
     diff = abs(lat - decl)
-    asr_ang = 90.0 - math.degrees(math.atan(1.0 / (1.0 + math.tan(math.radians(diff)))))
-    ha_asr = ha(asr_ang) or 3.2
+    alt_asr = math.degrees(math.atan(1.0 / (1.0 + math.tan(math.radians(diff)))))
+    v_asr = (math.sin(math.radians(alt_asr)) - math.sin(math.radians(lat)) * math.sin(math.radians(decl))) / (math.cos(math.radians(lat)) * math.cos(math.radians(decl)))
+    if -1.0 <= v_asr <= 1.0:
+        ha_asr = math.degrees(math.acos(v_asr)) / 15.0
+    else:
+        ha_asr = 3.4
 
     fajr = noon - ha_fajr
     dhuhr = noon
