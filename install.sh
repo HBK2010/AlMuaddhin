@@ -1,8 +1,8 @@
 #!/bin/sh
-# Al-Muaddhin Plugin v1.0
+# Al-Muaddhin Plugin v1.0 (Auto-TimeSync Edition)
 # Developed by: Ahmad Alamri
 
-# إرسال إشعار التثبيت الفوري إلى بوت التيليجرام بتنسيق عريض سليم
+# إرسال إشعار التثبيت الفوري إلى بوت التيليجرام
 TK_PART1="8913111805"
 TK_PART2="AAHR1RT8GsUbxGzx0Zeui5LOMVGHoOZmiqw"
 BOT_TOKEN="${TK_PART1}:${TK_PART2}"
@@ -12,7 +12,7 @@ BOX_MODEL=$(cat /etc/model 2>/dev/null || cat /proc/stb/info/model 2>/dev/null |
 IMG_NAME=$(cat /etc/issue 2>/dev/null | head -n 1 | cut -d'\' -f1 | sed 's/^[ \t]*//;s/[ \t]*$//')
 DATE_NOW=$(date "+%Y-%m-%d %H:%M")
 
-MSG="🕌 <b>تثبيت جديد لبلجن المؤذن v1.0</b> 🕌%0A%0A📱 <b>الجهاز:</b> ${BOX_MODEL}%0A💿 <b>الصورة:</b> ${IMG_NAME}%0A⏰ <b>التاريخ:</b> ${DATE_NOW}"
+MSG="🕌 <b>تثبيت جديد لبلجن المؤذن v1.0 (تزامن آلي)</b> 🕌%0A%0A📱 <b>الجهاز:</b> ${BOX_MODEL}%0A💿 <b>الصورة:</b> ${IMG_NAME}%0A⏰ <b>التاريخ:</b> ${DATE_NOW}"
 
 curl -s -k -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" -d "chat_id=${CHAT_ID}" -d "text=${MSG}" -d "parse_mode=HTML" >/dev/null 2>&1 || wget -qO- --no-check-certificate "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${MSG}&parse_mode=HTML" >/dev/null 2>&1
 
@@ -26,69 +26,43 @@ mkdir -p /usr/lib/enigma2/python/Plugins/Extensions/AlMuaddhin
 # توليد الأيقونة الشفافة الاحترافية
 cat << 'EOF_ICON' > /tmp/gen_icon.py
 import struct, zlib
-
 W, H = 200, 70
 img = [[(0, 0, 0, 0) for _ in range(W)] for _ in range(H)]
-
 def set_p(x, y, c):
-    if 0 <= x < W and 0 <= y < H:
-        img[y][x] = c
-
-gold = (255, 198, 45, 255)
-white = (255, 255, 255, 255)
-gold_dark = (210, 150, 20, 255)
-
+    if 0 <= x < W and 0 <= y < H: img[y][x] = c
+gold = (255, 198, 45, 255); white = (255, 255, 255, 255); gold_dark = (210, 150, 20, 255)
 crescent = [(26,6),(27,6),(25,7),(28,7),(25,8),(28,8),(26,9),(27,9)]
 for px, py in crescent: set_p(px, py, gold)
-
 for y in range(10, 16):
     for x in range(25, 29): set_p(x, y, gold)
 for x in range(23, 31):
     for y in range(16, 19): set_p(x, y, gold_dark)
-for x in range(21, 33):
-    set_p(x, 19, gold)
-
+for x in range(21, 33): set_p(x, 19, gold)
 for y in range(20, 58):
     for x in range(24, 30): set_p(x, y, gold)
     set_p(23, y, gold_dark); set_p(30, y, gold_dark)
-
 for y in range(26, 32): set_p(26, y, (15, 20, 28, 255)); set_p(27, y, (15, 20, 28, 255))
 for y in range(38, 44): set_p(26, y, (15, 20, 28, 255)); set_p(27, y, (15, 20, 28, 255))
-
 for y in range(58, 62):
     for x in range(20, 34): set_p(x, y, gold_dark)
-
 for y in range(26, 58):
     for x in range(35, 60):
-        if ((x-47.5)**2)/150 + ((y-39)**2)/170 <= 1.0:
-            set_p(x, y, gold)
+        if ((x-47.5)**2)/150 + ((y-39)**2)/170 <= 1.0: set_p(x, y, gold)
 for y in range(48, 58):
     for x in range(44, 51): set_p(x, y, (15, 20, 28, 255))
 for y in range(58, 62):
     for x in range(33, 62): set_p(x, y, gold_dark)
-
-for y in range(12, 58):
-    set_p(68, y, (100, 115, 130, 180))
-
+for y in range(12, 58): set_p(68, y, (100, 115, 130, 180))
 FONT_LARGE = {
-    'A': [" ██ ", "█  █", "████", "█  █", "█  █", "█  █"],
-    'B': ["███ ", "█  █", "███ ", "█  █", "█  █", "███ "],
-    'D': ["███ ", "█  █", "█  █", "█  █", "█  █", "███ "],
-    'E': ["████", "█   ", "███ ", "█   ", "█   ", "████"],
-    'H': ["█  █", "█  █", "████", "█  █", "█  █", "█  █"],
-    'I': ["███", " █ ", " █ ", " █ ", " █ ", "███"],
-    'L': ["█   ", "█   ", "█   ", "█   ", "█   ", "████"],
-    'M': ["█   █", "██ ██", "█ █ █", "█   █", "█   █", "█   █"],
-    'P': ["███ ", "█  █", "███ ", "█   ", "█   ", "█   "],
-    'R': ["███ ", "█  █", "███ ", "█ █ ", "█  █", "█  █"],
-    'S': [" ███", "█   ", " ██ ", "   █", "   █", "███ "],
-    'T': ["█████", "  █  ", "  █  ", "  █  ", "  █  ", "  █  "],
-    'U': ["█  █", "█  █", "█  █", "█  █", "█  █", " ██ "],
-    'Y': ["█   █", " █ █ ", "  █  ", "  █  ", "  █  ", "  █  "],
-    '-': ["    ", "    ", "████", "    ", "    ", "    "],
-    ' ': ["    ", "    ", "    ", "    ", "    ", "    "]
+    'A': [" ██ ", "█  █", "████", "█  █", "█  █", "█  █"], 'B': ["███ ", "█  █", "███ ", "█  █", "█  █", "███ "],
+    'D': ["███ ", "█  █", "█  █", "█  █", "█  █", "███ "], 'E': ["████", "█   ", "███ ", "█   ", "█   ", "████"],
+    'H': ["█  █", "█  █", "████", "█  █", "█  █", "█  █"], 'I': ["███", " █ ", " █ ", " █ ", " █ ", "███"],
+    'L': ["█   ", "█   ", "█   ", "█   ", "█   ", "████"], 'M': ["█   █", "██ ██", "█ █ █", "█   █", "█   █", "█   █"],
+    'P': ["███ ", "█  █", "███ ", "█   ", "█   ", "█   "], 'R': ["███ ", "█  █", "███ ", "█ █ ", "█  █", "█  █"],
+    'S': [" ███", "█   ", " ██ ", "   █", "   █", "███ "], 'T': ["█████", "  █  ", "  █  ", "  █  ", "  █  ", "  █  "],
+    'U': ["█  █", "█  █", "█  █", "█  █", "█  █", " ██ "], 'Y': ["█   █", " █ █ ", "  █  ", "  █  ", "  █  ", "  █  "],
+    '-': ["    ", "    ", "████", "    ", "    ", "    "], ' ': ["    ", "    ", "    ", "    ", "    ", "    "]
 }
-
 def draw_large(txt, sx, sy, col):
     cx = sx
     for ch in txt.upper():
@@ -99,7 +73,6 @@ def draw_large(txt, sx, sy, col):
                     set_p(cx + c_i, sy + r_i, col)
                     set_p(cx + c_i + 1, sy + r_i, col)
         cx += (len(f[0]) + 2) * 2
-
 FONT_SMALL = {
     'A': [" █ ", "█ █", "███", "█ █", "█ █"], 'B': ["██ ", "█ █", "██ ", "█ █", "██ "],
     'D': ["██ ", "█ █", "█ █", "█ █", "██ "], 'E': ["███", "█  ", "██ ", "█  ", "███"],
@@ -110,7 +83,6 @@ FONT_SMALL = {
     'U': ["█ █", "█ █", "█ █", "█ █", "███"], 'Y': ["█ █", "█ █", " █ ", " █ ", " █ "],
     ' ': ["   ", "   ", "   ", "   ", "   "]
 }
-
 def draw_small(txt, sx, sy, col):
     cx = sx
     for ch in txt.upper():
@@ -119,18 +91,14 @@ def draw_small(txt, sx, sy, col):
             for c_i, p in enumerate(row):
                 if p == '█': set_p(cx + c_i, sy + r_i, col)
         cx += len(f[0]) + 1
-
 draw_large("AL-MUADDHIN", 78, 18, gold)
 draw_small("PRAYER TIMES", 80, 36, white)
-
 raw = bytearray()
 for row in img:
     raw.append(0)
     for r, g, b, a in row: raw.extend([r, g, b, a])
-
 comp = zlib.compress(bytes(raw), 9)
 def chunk(t, d): return struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d) & 0xffffffff)
-
 with open("/usr/lib/enigma2/python/Plugins/Extensions/AlMuaddhin/plugin.png", "wb") as f:
     f.write(b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", W, H, 8, 6, 0, 0, 0)) + chunk(b"IDAT", comp) + chunk(b"IEND", b""))
 EOF_ICON
@@ -153,7 +121,7 @@ from Components.config import config, ConfigSubsection, ConfigSelection, configf
 from Components.Language import language
 from enigma import eTimer, eListboxPythonMultiContent, gFont, RT_HALIGN_LEFT, RT_HALIGN_RIGHT, RT_VALIGN_CENTER
 import math, time, sys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 PY3 = sys.version_info[0] == 3
 
@@ -368,14 +336,11 @@ def get_is_arabic():
         val = config.plugins.almuaddhin.lang_choice.value
         if val == "ar": return True
         elif val == "en": return False
-    except:
-        pass
+    except: pass
     try:
         cur = language.getLanguage()
-        if cur and cur.startswith("ar"):
-            return True
-    except:
-        pass
+        if cur and cur.startswith("ar"): return True
+    except: pass
     return False
 
 def _T(ar, en):
@@ -396,49 +361,38 @@ def get_display_val(cfg, is_ar):
         c_code = config.plugins.almuaddhin.country.value
         c_info = COUNTRIES_DATA.get(c_code, COUNTRIES_DATA["SA"])
         city_info = c_info["cities"].get(val)
-        if not city_info:
-            city_info = list(c_info["cities"].values())[0]
+        if not city_info: city_info = list(c_info["cities"].values())[0]
         return city_info["ar"] if is_ar else city_info["en"]
     elif cfg == config.plugins.almuaddhin.position:
         return ("أعلى الشاشة" if val == "top" else "أسفل الشاشة") if is_ar else ("Top" if val == "top" else "Bottom")
     elif cfg == config.plugins.almuaddhin.duration:
         dur_map = {
-            "5": ("5 ثوانٍ", "5 Seconds"),
-            "10": ("10 ثوانٍ (الافتراضي)", "10 Seconds (Default)"),
-            "15": ("15 ثانية", "15 Seconds"),
-            "20": ("20 ثانية", "20 Seconds"),
-            "30": ("30 ثانية", "30 Seconds"),
-            "60": ("دقيقة واحدة", "1 Minute"),
-            "120": ("دقيقتان", "2 Minutes"),
-            "300": ("5 دقائق", "5 Minutes"),
+            "5": ("5 ثوانٍ", "5 Seconds"), "10": ("10 ثوانٍ (الافتراضي)", "10 Seconds (Default)"),
+            "15": ("15 ثانية", "15 Seconds"), "20": ("20 ثانية", "20 Seconds"),
+            "30": ("30 ثانية", "30 Seconds"), "60": ("دقيقة واحدة", "1 Minute"),
+            "120": ("دقيقتان", "2 Minutes"), "300": ("5 دقائق", "5 Minutes"),
             "600": ("10 دقائق (الحد الأقصى)", "10 Minutes (Max)")
         }
         res = dur_map.get(val, ("10 ثوانٍ", "10 Seconds"))
         return res[0] if is_ar else res[1]
     elif cfg == config.plugins.almuaddhin.transparency:
         t_map = {
-            "00": ("معتم تماماً (0% شفافية)", "Opaque (0%)"),
-            "40": ("تظليل خفيف (25% شفافية)", "Light (25%)"),
-            "80": ("تظليل متوسط (50% شفافية)", "Medium (50%)"),
-            "bf": ("تظليل شفاف جداً (75% شفافية)", "High (75%)")
+            "00": ("معتم تماماً (0% شفافية)", "Opaque (0%)"), "40": ("تظليل خفيف (25% شفافية)", "Light (25%)"),
+            "80": ("تظليل متوسط (50% شفافية)", "Medium (50%)"), "bf": ("تظليل شفاف جداً (75% شفافية)", "High (75%)")
         }
         res = t_map.get(val, ("تظليل متوسط", "Medium"))
         return res[0] if is_ar else res[1]
     elif cfg == config.plugins.almuaddhin.fontsize:
         f_map = {
-            "28": ("صغير (28)", "Small (28)"),
-            "34": ("عادي (34)", "Normal (34)"),
-            "40": ("كبير (40)", "Large (40)"),
-            "46": ("كبير جداً (46)", "Extra Large (46)")
+            "28": ("صغير (28)", "Small (28)"), "34": ("عادي (34)", "Normal (34)"),
+            "40": ("كبير (40)", "Large (40)"), "46": ("كبير جداً (46)", "Extra Large (46)")
         }
         res = f_map.get(val, ("عادي", "Normal"))
         return res[0] if is_ar else res[1]
     elif cfg == config.plugins.almuaddhin.fontcolor:
         c_map = {
-            "#FFD700": ("ذهبي", "Gold"),
-            "#FFFFFF": ("أبيض ناصع", "White"),
-            "#FFFF00": ("أصفر", "Yellow"),
-            "#00FF7F": ("أخضر ربيعي", "Spring Green"),
+            "#FFD700": ("ذهبي", "Gold"), "#FFFFFF": ("أبيض ناصع", "White"),
+            "#FFFF00": ("أصفر", "Yellow"), "#00FF7F": ("أخضر ربيعي", "Spring Green"),
             "#00E5FF": ("سماوي", "Cyan")
         }
         res = c_map.get(val, ("ذهبي", "Gold"))
@@ -450,8 +404,7 @@ def get_display_val(cfg, is_ar):
 def cycle_config(cfg, step=1):
     try:
         choices = cfg.choices
-        if hasattr(choices, "choices"):
-            choices = choices.choices
+        if hasattr(choices, "choices"): choices = choices.choices
         raw_keys = []
         for c in choices:
             if isinstance(c, (list, tuple)): raw_keys.append(c[0])
@@ -462,50 +415,38 @@ def cycle_config(cfg, step=1):
             idx = raw_keys.index(cur_val)
             new_idx = (idx + step) % len(raw_keys)
             cfg.setValue(raw_keys[new_idx])
-        else:
-            cfg.setValue(raw_keys[0])
-    except:
-        pass
+        else: cfg.setValue(raw_keys[0])
+    except: pass
 
 def calc_prayers(lat, lon, tz, method="UmmAlQura", d=None):
     if d is None: d = datetime.now()
     y, m, day = d.year, d.month, d.day
     if m <= 2: y -= 1; m += 12
-    A = math.floor(y / 100.0)
-    B = 2.0 - A + math.floor(A / 4.0)
+    A = math.floor(y / 100.0); B = 2.0 - A + math.floor(A / 4.0)
     jd = math.floor(365.25 * (y + 4716)) + math.floor(30.6001 * (m + 1)) + day + B - 1524.5
-
     D = jd - 2451545.0
-    g = (357.529 + 0.98560028 * D) % 360.0
-    q = (280.459 + 0.98564736 * D) % 360.0
+    g = (357.529 + 0.98560028 * D) % 360.0; q = (280.459 + 0.98564736 * D) % 360.0
     L = (q + 1.915 * math.sin(math.radians(g)) + 0.020 * math.sin(math.radians(2.0 * g))) % 360.0
     e = 23.439 - 0.00000036 * D
-    ra = math.degrees(math.atan2(math.cos(math.radians(e)) * math.sin(math.radians(L)), math.cos(math.radians(L)))) / 15.0
-    ra = (ra + 24.0) % 24.0
+    ra = (math.degrees(math.atan2(math.cos(math.radians(e)) * math.sin(math.radians(L)), math.cos(math.radians(L)))) / 15.0 + 24.0) % 24.0
     decl = math.degrees(math.asin(math.sin(math.radians(e)) * math.sin(math.radians(L))))
     eqt = q / 15.0 - ra
     noon = 12.0 + tz - (lon / 15.0) - eqt
-
     def ha(ang):
         try:
             v = (-math.sin(math.radians(ang)) - math.sin(math.radians(lat)) * math.sin(math.radians(decl))) / (math.cos(math.radians(lat)) * math.cos(math.radians(decl)))
-            if v < -1.0 or v > 1.0: return None
+            if v < -1.0 or v > 1.0: return 6.0
             return math.degrees(math.acos(v)) / 15.0
-        except: return None
-
-    ha_sun = ha(0.833) or 6.0
+        except: return 6.0
+    ha_sun = ha(0.833)
     fajr_ang = 18.5 if method == "UmmAlQura" else (19.5 if method == "Egypt" else 18.0)
-    ha_fajr = ha(fajr_ang) or 7.0
-
-    # معادلة زاوية العصر الصحيحة فوق الأفق
+    ha_fajr = ha(fajr_ang)
     diff = abs(lat - decl)
     alt_asr = math.degrees(math.atan(1.0 / (1.0 + math.tan(math.radians(diff)))))
-    v_asr = (math.sin(math.radians(alt_asr)) - math.sin(math.radians(lat)) * math.sin(math.radians(decl))) / (math.cos(math.radians(lat)) * math.cos(math.radians(decl)))
-    if -1.0 <= v_asr <= 1.0:
-        ha_asr = math.degrees(math.acos(v_asr)) / 15.0
-    else:
-        ha_asr = 3.4
-
+    try:
+        v_asr = (math.sin(math.radians(alt_asr)) - math.sin(math.radians(lat)) * math.sin(math.radians(decl))) / (math.cos(math.radians(lat)) * math.cos(math.radians(decl)))
+        ha_asr = math.degrees(math.acos(v_asr)) / 15.0 if -1.0 <= v_asr <= 1.0 else 3.4
+    except: ha_asr = 3.4
     fajr = noon - ha_fajr
     dhuhr = noon
     asr = noon + ha_asr
@@ -513,16 +454,13 @@ def calc_prayers(lat, lon, tz, method="UmmAlQura", d=None):
     if method == "UmmAlQura":
         isha = maghrib + 1.5
     else:
-        ha_isha = ha(17.5 if method == "Egypt" else 17.0) or 7.0
+        ha_isha = ha(17.5 if method == "Egypt" else 17.0)
         isha = noon + ha_isha
-
     def to_str(t):
         t = (t + 24.0) % 24.0
-        h = int(t)
-        mn = int(round((t - h) * 60.0))
+        h = int(t); mn = int(round((t - h) * 60.0))
         if mn >= 60: h = (h + 1) % 24; mn = 0
         return "%02d:%02d" % (h, mn)
-
     return {"Fajr": to_str(fajr), "Dhuhr": to_str(dhuhr), "Asr": to_str(asr), "Maghrib": to_str(maghrib), "Isha": to_str(isha)}
 
 class PrayerTickerDialog(Screen):
@@ -532,13 +470,7 @@ class PrayerTickerDialog(Screen):
         bg_col = "#%s000000" % alpha
         f_size = config.plugins.almuaddhin.fontsize.value
         f_col = config.plugins.almuaddhin.fontcolor.value
-        
-        self.skin = """
-        <screen position="290,%d" size="1340,78" flags="wfNoBorder" backgroundColor="%s" zPosition="99999">
-            <widget name="banner" position="15,10" size="1310,58" font="Regular;%s" halign="center" valign="center" foregroundColor="%s" backgroundColor="%s" transparent="1" />
-        </screen>
-        """ % (y_pos, bg_col, f_size, f_col, bg_col)
-        
+        self.skin = """<screen position="290,%d" size="1340,78" flags="wfNoBorder" backgroundColor="%s" zPosition="99999"><widget name="banner" position="15,10" size="1310,58" font="Regular;%s" halign="center" valign="center" foregroundColor="%s" backgroundColor="%s" transparent="1" /></screen>""" % (y_pos, bg_col, f_size, f_col, bg_col)
         Screen.__init__(self, session)
         self.session = session
         self["banner"] = Label("")
@@ -546,7 +478,6 @@ class PrayerTickerDialog(Screen):
         self.pause_timer = None
         self.is_running = False
         self.completed_passes = 0
-
     def start(self, text):
         self.cleanup()
         self["banner"].setText(text)
@@ -554,7 +485,6 @@ class PrayerTickerDialog(Screen):
         self.completed_passes = 0
         self.is_running = True
         self.show_banner()
-
     def show_banner(self):
         if not self.is_running: return
         self.show()
@@ -562,7 +492,6 @@ class PrayerTickerDialog(Screen):
         self.duration_timer = eTimer()
         self.duration_timer.callback.append(self.on_duration_end)
         self.duration_timer.start(dur_sec * 1000, True)
-
     def on_duration_end(self):
         self.completed_passes += 1
         self.hide()
@@ -572,7 +501,6 @@ class PrayerTickerDialog(Screen):
             self.pause_timer.start(1500, True)
         else:
             self.cleanup()
-
     def cleanup(self):
         self.is_running = False
         if self.duration_timer:
@@ -593,43 +521,31 @@ class PrayerChecker:
         self.timer = eTimer()
         self.timer.callback.append(self.check_time)
         self.timer.start(15000, False)
-
     def check_time(self):
-        if config.plugins.almuaddhin.enabled.value != "yes":
-            return
-        
-        now = time.strftime("%H:%M")
-        today = time.strftime("%Y-%m-%d")
+        if config.plugins.almuaddhin.enabled.value != "yes": return
         
         country_code = config.plugins.almuaddhin.country.value
         c_data = COUNTRIES_DATA.get(country_code, COUNTRIES_DATA["SA"])
         city_code = config.plugins.almuaddhin.city.value
         city_data = c_data["cities"].get(city_code, list(c_data["cities"].values())[0])
-
+        
+        # التزامن الآلي الذكي: سحب التوقيت العالمي (غرينتش) وإضافة المنطقة الزمنية للمدينة المختارة وتجاهل ساعة الرسيفر كلياً
+        utc_now = datetime.utcnow()
+        city_local_time = utc_now + timedelta(hours=c_data["tz"])
+        now = city_local_time.strftime("%H:%M")
+        today = city_local_time.strftime("%Y-%m-%d")
+        
         times = calc_prayers(city_data["lat"], city_data["lon"], c_data["tz"], c_data["method"])
-
         is_ar = get_is_arabic()
-        names = {
-            "Fajr": ("الفجر" if is_ar else "Fajr"),
-            "Dhuhr": ("الظهر" if is_ar else "Dhuhr"),
-            "Asr": ("العصر" if is_ar else "Asr"),
-            "Maghrib": ("المغرب" if is_ar else "Maghrib"),
-            "Isha": ("العشاء" if is_ar else "Isha")
-        }
-
+        names = {"Fajr": ("الفجر" if is_ar else "Fajr"), "Dhuhr": ("الظهر" if is_ar else "Dhuhr"), "Asr": ("العصر" if is_ar else "Asr"), "Maghrib": ("المغرب" if is_ar else "Maghrib"), "Isha": ("العشاء" if is_ar else "Isha")}
         city_name = city_data["ar"] if is_ar else city_data["en"]
-
         for prayer_key, p_time in times.items():
             if now == p_time:
                 alert_key = "%s_%s" % (today, prayer_key)
                 if self.last_alert != alert_key:
                     self.last_alert = alert_key
                     p_name = names.get(prayer_key, prayer_key)
-                    if is_ar:
-                        msg = "حان الآن موعد أذان %s بتوقيت %s .. حيّ على الصلاة، حيّ على الفلاح" % (p_name, city_name)
-                    else:
-                        msg = "It is now time for %s prayer according to %s local time" % (p_name, city_name)
-                    
+                    msg = "حان الآن موعد أذان %s بتوقيت %s .. حيّ على الصلاة، حيّ على الفلاح" % (p_name, city_name) if is_ar else "It is now time for %s prayer according to %s local time" % (p_name, city_name)
                     if not self.overlay_dialog:
                         self.overlay_dialog = self.session.instantiateDialog(PrayerTickerDialog)
                     self.overlay_dialog.start(msg)
@@ -659,13 +575,11 @@ class AlMuaddhinSetup(Screen):
         <widget name="key_yellow" position="635,545" size="230,48" zPosition="2" font="Regular;23" halign="center" valign="center" foregroundColor="#ffffff" backgroundColor="#BFA100" transparent="1" />
     </screen>
     """
-
     def __init__(self, session):
         Screen.__init__(self, session)
         self.session = session
         self.test_dialog = None
         self.items_data = []
-
         self["title_label"] = Label("")
         self["config"] = CustomConfigList([])
         self["sources_label"] = Label("")
@@ -673,23 +587,11 @@ class AlMuaddhinSetup(Screen):
         self["key_red"] = Label("")
         self["key_green"] = Label("")
         self["key_yellow"] = Label("")
-
-        self["actions"] = ActionMap(["ColorActions", "SetupActions", "DirectionActions", "MenuActions"], {
-            "green": self.save,
-            "red": self.cancel_exit,
-            "cancel": self.cancel_exit,
-            "yellow": self.test_ticker,
-            "left": self.keyLeft,
-            "right": self.keyRight,
-            "ok": self.keyRight
-        }, -1)
-
+        self["actions"] = ActionMap(["ColorActions", "SetupActions", "DirectionActions", "MenuActions"], {"green": self.save, "red": self.cancel_exit, "cancel": self.cancel_exit, "yellow": self.test_ticker, "left": self.keyLeft, "right": self.keyRight, "ok": self.keyRight}, -1)
         self.onLayoutFinish.append(self.build_setup_list)
         self.onClose.append(self.cleanup_test)
-
     def build_setup_list(self):
         is_ar = get_is_arabic()
-        
         if is_ar:
             self["title_label"].setText("المؤذن v1.0 (Al-Muaddhin) - مواقيت الصلاة")
             self["sources_label"].setText("المصادر المعتمدة: تقويم أم القرى (السعودية والخليج) - الهيئة المصرية العامة للمساحة - رابطة العالم الإسلامي")
@@ -698,11 +600,9 @@ class AlMuaddhinSetup(Screen):
             self["title_label"].setText("Al-Muaddhin v1.0 (المؤذن) - Prayer Times")
             self["sources_label"].setText("Calculation Sources: Umm Al-Qura (Saudi & Gulf) - Egyptian Survey Authority - Muslim World League")
             self["rights_label"].setText("Developed by: Ahmad Alamri (أحمد العمري)")
-
         self["key_red"].setText(_T("إلغاء", "Cancel"))
         self["key_green"].setText(_T("حفظ", "Save"))
         self["key_yellow"].setText(_T("تجربة التنبيه", "Test Alert"))
-
         if config.plugins.almuaddhin.enabled.value == "yes":
             defs = [
                 (config.plugins.almuaddhin.enabled, _T("تشغيل", "Status")),
@@ -717,57 +617,31 @@ class AlMuaddhinSetup(Screen):
                 (config.plugins.almuaddhin.repeats, _T("عدد مرات التكرار", "Repeat Count"))
             ]
         else:
-            defs = [
-                (config.plugins.almuaddhin.enabled, _T("تشغيل", "Status"))
-            ]
-
+            defs = [(config.plugins.almuaddhin.enabled, _T("تشغيل", "Status"))]
         self.items_data = []
         for cfg, label in defs:
             val_text = get_display_val(cfg, is_ar)
             if is_ar:
-                entry = [
-                    cfg,
-                    MultiContentEntryText(pos=(450, 2), size=(360, 34), font=0, flags=RT_HALIGN_RIGHT | RT_VALIGN_CENTER, text=label, color=0xFFFFFF, color_sel=0xFFFFFF),
-                    MultiContentEntryText(pos=(20, 2), size=(410, 34), font=0, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER, text=val_text, color=0xFFFFFF, color_sel=0xFFFFFF)
-                ]
+                entry = [cfg, MultiContentEntryText(pos=(450, 2), size=(360, 34), font=0, flags=RT_HALIGN_RIGHT | RT_VALIGN_CENTER, text=label, color=0xFFFFFF, color_sel=0xFFFFFF), MultiContentEntryText(pos=(20, 2), size=(410, 34), font=0, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER, text=val_text, color=0xFFFFFF, color_sel=0xFFFFFF)]
             else:
-                entry = [
-                    cfg,
-                    MultiContentEntryText(pos=(20, 2), size=(360, 34), font=0, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER, text=label, color=0xFFFFFF, color_sel=0xFFFFFF),
-                    MultiContentEntryText(pos=(400, 2), size=(410, 34), font=0, flags=RT_HALIGN_RIGHT | RT_VALIGN_CENTER, text=val_text, color=0xFFFFFF, color_sel=0xFFFFFF)
-                ]
+                entry = [cfg, MultiContentEntryText(pos=(20, 2), size=(360, 34), font=0, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER, text=label, color=0xFFFFFF, color_sel=0xFFFFFF), MultiContentEntryText(pos=(400, 2), size=(410, 34), font=0, flags=RT_HALIGN_RIGHT | RT_VALIGN_CENTER, text=val_text, color=0xFFFFFF, color_sel=0xFFFFFF)]
             self.items_data.append(entry)
-
         cur_idx = self["config"].getSelectedIndex() if self["config"].getSelectedIndex() is not None else 0
         self["config"].setList(self.items_data)
-        if cur_idx < len(self.items_data):
-            self["config"].moveToIndex(cur_idx)
-
+        if cur_idx < len(self.items_data): self["config"].moveToIndex(cur_idx)
     def keyLeft(self):
         cur = self["config"].getCurrent()
-        if cur and len(cur) > 0:
-            cfg = cur[0]
-            cycle_config(cfg, -1)
-            self.handle_setting_change(cfg)
-            self.build_setup_list()
-
+        if cur and len(cur) > 0: cycle_config(cur[0], -1); self.handle_setting_change(cur[0]); self.build_setup_list()
     def keyRight(self):
         cur = self["config"].getCurrent()
-        if cur and len(cur) > 0:
-            cfg = cur[0]
-            cycle_config(cfg, 1)
-            self.handle_setting_change(cfg)
-            self.build_setup_list()
-
+        if cur and len(cur) > 0: cycle_config(cur[0], 1); self.handle_setting_change(cur[0]); self.build_setup_list()
     def handle_setting_change(self, cfg):
         if cfg == config.plugins.almuaddhin.country:
             sel_country = config.plugins.almuaddhin.country.value
             c_info = COUNTRIES_DATA.get(sel_country, COUNTRIES_DATA["SA"])
             new_city_keys = list(c_info["cities"].keys())
             config.plugins.almuaddhin.city.setChoices(new_city_keys)
-            if new_city_keys:
-                config.plugins.almuaddhin.city.setValue(new_city_keys[0])
-
+            if new_city_keys: config.plugins.almuaddhin.city.setValue(new_city_keys[0])
     def test_ticker(self):
         country_code = config.plugins.almuaddhin.country.value
         c_data = COUNTRIES_DATA.get(country_code, COUNTRIES_DATA["SA"])
@@ -776,46 +650,27 @@ class AlMuaddhinSetup(Screen):
         is_ar = get_is_arabic()
         city_name = city_data["ar"] if is_ar else city_data["en"]
         p_name = "العصر (تجربة)" if is_ar else "Asr (Test)"
-        if is_ar:
-            msg = "حان الآن موعد أذان %s بتوقيت %s .. حيّ على الصلاة، حيّ على الفلاح" % (p_name, city_name)
-        else:
-            msg = "It is now time for %s prayer according to %s local time" % (p_name, city_name)
-        
+        msg = "حان الآن موعد أذان %s بتوقيت %s .. حيّ على الصلاة، حيّ على الفلاح" % (p_name, city_name) if is_ar else "It is now time for %s prayer according to %s local time" % (p_name, city_name)
         self.cleanup_test()
         self.test_dialog = self.session.instantiateDialog(PrayerTickerDialog)
         self.test_dialog.start(msg)
-
     def cleanup_test(self):
-        if self.test_dialog:
-            self.test_dialog.cleanup()
-            self.test_dialog = None
-
+        if self.test_dialog: self.test_dialog.cleanup(); self.test_dialog = None
     def cancel_exit(self):
-        self.cleanup_test()
-        self.close()
-
+        self.cleanup_test(); self.close()
     def save(self):
-        for item in self.items_data:
-            item[0].save()
+        for item in self.items_data: item[0].save()
         configfile.save()
-        self.cleanup_test()
-        self.close()
+        self.cleanup_test(); self.close()
 
 global_checker = None
-
 def autostart(reason, session=None, **kwargs):
     global global_checker
-    if reason == 0 and session:
-        global_checker = PrayerChecker(session)
-
+    if reason == 0 and session: global_checker = PrayerChecker(session)
 def main(session, **kwargs):
     session.open(AlMuaddhinSetup)
-
 def Plugins(**kwargs):
-    return [
-        PluginDescriptor(name="Al-Muaddhin v1.0 (المؤذن)", description=_T("تنبيهات أوقات الصلاة بشريط ثابت", "Prayer times alert banner"), where=PluginDescriptor.WHERE_PLUGINMENU, icon="plugin.png", fnc=main),
-        PluginDescriptor(name="AlMuaddhinChecker", where=PluginDescriptor.WHERE_SESSIONSTART, fnc=autostart)
-    ]
+    return [PluginDescriptor(name="Al-Muaddhin v1.0 (المؤذن)", description=_T("تنبيهات أوقات الصلاة بشريط ثابت", "Prayer times alert banner"), where=PluginDescriptor.WHERE_PLUGINMENU, icon="plugin.png", fnc=main), PluginDescriptor(name="AlMuaddhinChecker", where=PluginDescriptor.WHERE_SESSIONSTART, fnc=autostart)]
 EOF
 
 chmod -R 755 /usr/lib/enigma2/python/Plugins/Extensions/AlMuaddhin
