@@ -1,5 +1,5 @@
 #!/bin/sh
-# Al-Muaddhin Plugin v1.0 (Auto-TimeSync Edition)
+# Al-Muaddhin Plugin v1.0 (Auto-TimeSync & Fixed Banner Edition)
 # Developed by: Ahmad Alamri
 
 # إرسال إشعار التثبيت الفوري إلى بوت التيليجرام
@@ -12,7 +12,7 @@ BOX_MODEL=$(cat /etc/model 2>/dev/null || cat /proc/stb/info/model 2>/dev/null |
 IMG_NAME=$(cat /etc/issue 2>/dev/null | head -n 1 | cut -d'\' -f1 | sed 's/^[ \t]*//;s/[ \t]*$//')
 DATE_NOW=$(date "+%Y-%m-%d %H:%M")
 
-MSG="🕌 <b>تثبيت جديد لبلجن المؤذن v1.0 (تزامن آلي)</b> 🕌%0A%0A📱 <b>الجهاز:</b> ${BOX_MODEL}%0A💿 <b>الصورة:</b> ${IMG_NAME}%0A⏰ <b>التاريخ:</b> ${DATE_NOW}"
+MSG="🕌 <b>تثبيت جديد لبلجن المؤذن v1.0 (تحديث التظليل والخط)</b> 🕌%0A%0A📱 <b>الجهاز:</b> ${BOX_MODEL}%0A💿 <b>الصورة:</b> ${IMG_NAME}%0A⏰ <b>التاريخ:</b> ${DATE_NOW}"
 
 curl -s -k -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" -d "chat_id=${CHAT_ID}" -d "text=${MSG}" -d "parse_mode=HTML" >/dev/null 2>&1 || wget -qO- --no-check-certificate "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${MSG}&parse_mode=HTML" >/dev/null 2>&1
 
@@ -322,7 +322,8 @@ config.plugins.almuaddhin.city = ConfigSelection(default="Makkah", choices=list(
 config.plugins.almuaddhin.position = ConfigSelection(default="top", choices=["top", "bottom"])
 config.plugins.almuaddhin.duration = ConfigSelection(default="10", choices=["5", "10", "15", "20", "30", "60", "120", "300", "600"])
 config.plugins.almuaddhin.transparency = ConfigSelection(default="80", choices=["00", "40", "80", "bf"])
-config.plugins.almuaddhin.fontsize = ConfigSelection(default="34", choices=["28", "34", "40", "46"])
+# تم تقليل الخطوط وتحديث الافتراضي ليكون 28
+config.plugins.almuaddhin.fontsize = ConfigSelection(default="28", choices=["22", "25", "28", "32"])
 config.plugins.almuaddhin.fontcolor = ConfigSelection(default="#FFD700", choices=["#FFD700", "#FFFFFF", "#FFFF00", "#00FF7F", "#00E5FF"])
 config.plugins.almuaddhin.repeats = ConfigSelection(default="3", choices=[str(i) for i in range(1, 31)])
 
@@ -330,6 +331,10 @@ if config.plugins.almuaddhin.repeats.value not in [str(i) for i in range(1, 31)]
     config.plugins.almuaddhin.repeats.value = "3"
 if config.plugins.almuaddhin.duration.value not in ["5", "10", "15", "20", "30", "60", "120", "300", "600"]:
     config.plugins.almuaddhin.duration.value = "10"
+if config.plugins.almuaddhin.position.value not in ["top", "bottom"]:
+    config.plugins.almuaddhin.position.value = "top"
+if config.plugins.almuaddhin.fontsize.value not in ["22", "25", "28", "32"]:
+    config.plugins.almuaddhin.fontsize.value = "28"
 
 def get_is_arabic():
     try:
@@ -384,8 +389,8 @@ def get_display_val(cfg, is_ar):
         return res[0] if is_ar else res[1]
     elif cfg == config.plugins.almuaddhin.fontsize:
         f_map = {
-            "28": ("صغير (28)", "Small (28)"), "34": ("عادي (34)", "Normal (34)"),
-            "40": ("كبير (40)", "Large (40)"), "46": ("كبير جداً (46)", "Extra Large (46)")
+            "22": ("صغير جداً (22)", "Very Small (22)"), "25": ("صغير (25)", "Small (25)"),
+            "28": ("عادي (28)", "Normal (28)"), "32": ("كبير (32)", "Large (32)")
         }
         res = f_map.get(val, ("عادي", "Normal"))
         return res[0] if is_ar else res[1]
@@ -465,12 +470,22 @@ def calc_prayers(lat, lon, tz, method="UmmAlQura", d=None):
 
 class PrayerTickerDialog(Screen):
     def __init__(self, session):
-        y_pos = 50 if config.plugins.almuaddhin.position.value == "top" else 950
+        pos_val = config.plugins.almuaddhin.position.value
+        # إصلاح مكان الأسفل ليتناسب مع جميع مقاسات الشاشات
+        y_pos = 50 if pos_val == "top" else 620
+        
         alpha = config.plugins.almuaddhin.transparency.value
         bg_col = "#%s000000" % alpha
         f_size = config.plugins.almuaddhin.fontsize.value
         f_col = config.plugins.almuaddhin.fontcolor.value
-        self.skin = """<screen position="290,%d" size="1340,78" flags="wfNoBorder" backgroundColor="%s" zPosition="99999"><widget name="banner" position="15,10" size="1310,58" font="Regular;%s" halign="center" valign="center" foregroundColor="%s" backgroundColor="%s" transparent="1" /></screen>""" % (y_pos, bg_col, f_size, f_col, bg_col)
+        
+        # العرض تم تحديده بـ 920 بكسل ليكون بحجم جدول الإعدادات بالضبط والتوسيط آلي
+        self.skin = """
+        <screen position="center,%d" size="920,60" flags="wfNoBorder" backgroundColor="%s" zPosition="99999">
+            <widget name="banner" position="10,0" size="900,60" font="Regular;%s" halign="center" valign="center" foregroundColor="%s" backgroundColor="%s" transparent="1" />
+        </screen>
+        """ % (y_pos, bg_col, f_size, f_col, bg_col)
+        
         Screen.__init__(self, session)
         self.session = session
         self["banner"] = Label("")
@@ -529,7 +544,6 @@ class PrayerChecker:
         city_code = config.plugins.almuaddhin.city.value
         city_data = c_data["cities"].get(city_code, list(c_data["cities"].values())[0])
         
-        # التزامن الآلي الذكي: سحب التوقيت العالمي (غرينتش) وإضافة المنطقة الزمنية للمدينة المختارة وتجاهل ساعة الرسيفر كلياً
         utc_now = datetime.utcnow()
         city_local_time = utc_now + timedelta(hours=c_data["tz"])
         now = city_local_time.strftime("%H:%M")
