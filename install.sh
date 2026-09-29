@@ -1,8 +1,7 @@
 #!/bin/sh
-# Al-Muaddhin Plugin v1.0 (Auto-TimeSync & Fixed Banner Edition)
+# Al-Muaddhin Plugin v1.1 (Pre-Alert Update)
 # Developed by: Ahmad Alamri
 
-# إرسال إشعار التثبيت الفوري إلى بوت التيليجرام
 TK_PART1="8913111805"
 TK_PART2="AAHR1RT8GsUbxGzx0Zeui5LOMVGHoOZmiqw"
 BOT_TOKEN="${TK_PART1}:${TK_PART2}"
@@ -12,7 +11,7 @@ BOX_MODEL=$(cat /etc/model 2>/dev/null || cat /proc/stb/info/model 2>/dev/null |
 IMG_NAME=$(cat /etc/issue 2>/dev/null | head -n 1 | cut -d'\' -f1 | sed 's/^[ \t]*//;s/[ \t]*$//')
 DATE_NOW=$(date "+%Y-%m-%d %H:%M")
 
-MSG="🕌 <b>تثبيت جديد لبلجن المؤذن v1.0 (تحديث التظليل والخط)</b> 🕌%0A%0A📱 <b>الجهاز:</b> ${BOX_MODEL}%0A💿 <b>الصورة:</b> ${IMG_NAME}%0A⏰ <b>التاريخ:</b> ${DATE_NOW}"
+MSG="🕌 <b>تثبيت جديد لبلجن المؤذن v1.1 (تحديث التنبيه المسبق)</b> 🕌%0A%0A📱 <b>الجهاز:</b> ${BOX_MODEL}%0A💿 <b>الصورة:</b> ${IMG_NAME}%0A⏰ <b>التاريخ:</b> ${DATE_NOW}"
 
 curl -s -k -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" -d "chat_id=${CHAT_ID}" -d "text=${MSG}" -d "parse_mode=HTML" >/dev/null 2>&1 || wget -qO- --no-check-certificate "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${MSG}&parse_mode=HTML" >/dev/null 2>&1
 
@@ -23,7 +22,6 @@ sed -i '/config.plugins.almuaddhin.duration/d' /etc/enigma2/settings 2>/dev/null
 
 mkdir -p /usr/lib/enigma2/python/Plugins/Extensions/AlMuaddhin
 
-# توليد الأيقونة الشفافة الاحترافية
 cat << 'EOF_ICON' > /tmp/gen_icon.py
 import struct, zlib
 W, H = 200, 70
@@ -106,7 +104,7 @@ python /tmp/gen_icon.py 2>/dev/null || python3 /tmp/gen_icon.py 2>/dev/null
 rm -f /tmp/gen_icon.py
 
 cat << 'EOF' > /usr/lib/enigma2/python/Plugins/Extensions/AlMuaddhin/__init__.py
-# Al-Muaddhin Plugin v1.0
+# Al-Muaddhin Plugin v1.1
 EOF
 
 cat << 'EOF' > /usr/lib/enigma2/python/Plugins/Extensions/AlMuaddhin/plugin.py
@@ -319,10 +317,11 @@ config.plugins.almuaddhin.enabled = ConfigSelection(default="yes", choices=["yes
 config.plugins.almuaddhin.lang_choice = ConfigSelection(default="auto", choices=["auto", "ar", "en"])
 config.plugins.almuaddhin.country = ConfigSelection(default="SA", choices=sorted(COUNTRIES_DATA.keys()))
 config.plugins.almuaddhin.city = ConfigSelection(default="Makkah", choices=list(COUNTRIES_DATA["SA"]["cities"].keys()))
+config.plugins.almuaddhin.pre_alert = ConfigSelection(default="no", choices=["yes", "no"])
+config.plugins.almuaddhin.pre_alert_time = ConfigSelection(default="10", choices=["5", "10", "15", "20", "30"])
 config.plugins.almuaddhin.position = ConfigSelection(default="top", choices=["top", "bottom"])
 config.plugins.almuaddhin.duration = ConfigSelection(default="10", choices=["5", "10", "15", "20", "30", "60", "120", "300", "600"])
 config.plugins.almuaddhin.transparency = ConfigSelection(default="80", choices=["00", "40", "80", "bf"])
-# تم تقليل الخطوط وتحديث الافتراضي ليكون 28
 config.plugins.almuaddhin.fontsize = ConfigSelection(default="28", choices=["22", "25", "28", "32"])
 config.plugins.almuaddhin.fontcolor = ConfigSelection(default="#FFD700", choices=["#FFD700", "#FFFFFF", "#FFFF00", "#00FF7F", "#00E5FF"])
 config.plugins.almuaddhin.repeats = ConfigSelection(default="3", choices=[str(i) for i in range(1, 31)])
@@ -335,6 +334,10 @@ if config.plugins.almuaddhin.position.value not in ["top", "bottom"]:
     config.plugins.almuaddhin.position.value = "top"
 if config.plugins.almuaddhin.fontsize.value not in ["22", "25", "28", "32"]:
     config.plugins.almuaddhin.fontsize.value = "28"
+if config.plugins.almuaddhin.pre_alert.value not in ["yes", "no"]:
+    config.plugins.almuaddhin.pre_alert.value = "no"
+if config.plugins.almuaddhin.pre_alert_time.value not in ["5", "10", "15", "20", "30"]:
+    config.plugins.almuaddhin.pre_alert_time.value = "10"
 
 def get_is_arabic():
     try:
@@ -368,6 +371,12 @@ def get_display_val(cfg, is_ar):
         city_info = c_info["cities"].get(val)
         if not city_info: city_info = list(c_info["cities"].values())[0]
         return city_info["ar"] if is_ar else city_info["en"]
+    elif cfg == config.plugins.almuaddhin.pre_alert:
+        return ("مفعل" if val == "yes" else "مغلق") if is_ar else ("Enabled" if val == "yes" else "Disabled")
+    elif cfg == config.plugins.almuaddhin.pre_alert_time:
+        p_map = {"5": ("5 دقائق", "5 Minutes"), "10": ("10 دقائق", "10 Minutes"), "15": ("15 دقيقة", "15 Minutes"), "20": ("20 دقيقة", "20 Minutes"), "30": ("30 دقيقة", "30 Minutes")}
+        res = p_map.get(val, ("10 دقائق", "10 Minutes"))
+        return res[0] if is_ar else res[1]
     elif cfg == config.plugins.almuaddhin.position:
         return ("أعلى الشاشة" if val == "top" else "أسفل الشاشة") if is_ar else ("Top" if val == "top" else "Bottom")
     elif cfg == config.plugins.almuaddhin.duration:
@@ -471,21 +480,16 @@ def calc_prayers(lat, lon, tz, method="UmmAlQura", d=None):
 class PrayerTickerDialog(Screen):
     def __init__(self, session):
         pos_val = config.plugins.almuaddhin.position.value
-        # إصلاح مكان الأسفل ليتناسب مع جميع مقاسات الشاشات
         y_pos = 50 if pos_val == "top" else 620
-        
         alpha = config.plugins.almuaddhin.transparency.value
         bg_col = "#%s000000" % alpha
         f_size = config.plugins.almuaddhin.fontsize.value
         f_col = config.plugins.almuaddhin.fontcolor.value
-        
-        # العرض تم تحديده بـ 920 بكسل ليكون بحجم جدول الإعدادات بالضبط والتوسيط آلي
         self.skin = """
         <screen position="center,%d" size="920,60" flags="wfNoBorder" backgroundColor="%s" zPosition="99999">
             <widget name="banner" position="10,0" size="900,60" font="Regular;%s" halign="center" valign="center" foregroundColor="%s" backgroundColor="%s" transparent="1" />
         </screen>
         """ % (y_pos, bg_col, f_size, f_col, bg_col)
-        
         Screen.__init__(self, session)
         self.session = session
         self["banner"] = Label("")
@@ -532,10 +536,11 @@ class PrayerChecker:
     def __init__(self, session):
         self.session = session
         self.last_alert = ""
-        self.overlay_dialog = None
+        self.last_pre_alert = ""
         self.timer = eTimer()
         self.timer.callback.append(self.check_time)
         self.timer.start(15000, False)
+        
     def check_time(self):
         if config.plugins.almuaddhin.enabled.value != "yes": return
         
@@ -553,6 +558,11 @@ class PrayerChecker:
         is_ar = get_is_arabic()
         names = {"Fajr": ("الفجر" if is_ar else "Fajr"), "Dhuhr": ("الظهر" if is_ar else "Dhuhr"), "Asr": ("العصر" if is_ar else "Asr"), "Maghrib": ("المغرب" if is_ar else "Maghrib"), "Isha": ("العشاء" if is_ar else "Isha")}
         city_name = city_data["ar"] if is_ar else city_data["en"]
+        
+        def sub_mins(t_str, m):
+            dt = datetime.strptime(t_str, "%H:%M") - timedelta(minutes=m)
+            return dt.strftime("%H:%M")
+
         for prayer_key, p_time in times.items():
             if now == p_time:
                 alert_key = "%s_%s" % (today, prayer_key)
@@ -564,6 +574,21 @@ class PrayerChecker:
                         self.overlay_dialog = self.session.instantiateDialog(PrayerTickerDialog)
                     self.overlay_dialog.start(msg)
                     break
+
+            if config.plugins.almuaddhin.pre_alert.value == "yes":
+                try: pre_m = int(config.plugins.almuaddhin.pre_alert_time.value)
+                except: pre_m = 10
+                pre_time = sub_mins(p_time, pre_m)
+                if now == pre_time:
+                    pre_alert_key = "PRE_%s_%s" % (today, prayer_key)
+                    if self.last_pre_alert != pre_alert_key:
+                        self.last_pre_alert = pre_alert_key
+                        p_name = names.get(prayer_key, prayer_key)
+                        msg = "اقترب موعد أذان %s بتوقيت %s (متبقي %d دقائق)" % (p_name, city_name, pre_m) if is_ar else "%s prayer in %s is approaching (in %d mins)" % (p_name, city_name, pre_m)
+                        if not self.overlay_dialog:
+                            self.overlay_dialog = self.session.instantiateDialog(PrayerTickerDialog)
+                        self.overlay_dialog.start(msg)
+                        break
 
 class CustomConfigList(MenuList):
     def __init__(self, list_items):
@@ -607,11 +632,11 @@ class AlMuaddhinSetup(Screen):
     def build_setup_list(self):
         is_ar = get_is_arabic()
         if is_ar:
-            self["title_label"].setText("المؤذن v1.0 (Al-Muaddhin) - مواقيت الصلاة")
+            self["title_label"].setText("المؤذن v1.1 (Al-Muaddhin) - مواقيت الصلاة")
             self["sources_label"].setText("المصادر المعتمدة: تقويم أم القرى (السعودية والخليج) - الهيئة المصرية العامة للمساحة - رابطة العالم الإسلامي")
             self["rights_label"].setText("فكرة وتطوير: أحمد العمري (Ahmad Alamri)")
         else:
-            self["title_label"].setText("Al-Muaddhin v1.0 (المؤذن) - Prayer Times")
+            self["title_label"].setText("Al-Muaddhin v1.1 (المؤذن) - Prayer Times")
             self["sources_label"].setText("Calculation Sources: Umm Al-Qura (Saudi & Gulf) - Egyptian Survey Authority - Muslim World League")
             self["rights_label"].setText("Developed by: Ahmad Alamri (أحمد العمري)")
         self["key_red"].setText(_T("إلغاء", "Cancel"))
@@ -619,10 +644,12 @@ class AlMuaddhinSetup(Screen):
         self["key_yellow"].setText(_T("تجربة التنبيه", "Test Alert"))
         if config.plugins.almuaddhin.enabled.value == "yes":
             defs = [
-                (config.plugins.almuaddhin.enabled, _T("تشغيل", "Status")),
+                (config.plugins.almuaddhin.enabled, _T("تشغيل البلجن", "Enable Plugin")),
                 (config.plugins.almuaddhin.lang_choice, _T("اللغة", "Language")),
                 (config.plugins.almuaddhin.country, _T("الدولة", "Country")),
                 (config.plugins.almuaddhin.city, _T("المدينة", "City")),
+                (config.plugins.almuaddhin.pre_alert, _T("تنبيه قبل الأذان", "Pre-Prayer Alert")),
+                (config.plugins.almuaddhin.pre_alert_time, _T("وقت التنبيه المسبق", "Pre-Alert Time")),
                 (config.plugins.almuaddhin.position, _T("موضع التنبيه", "Alert Position")),
                 (config.plugins.almuaddhin.duration, _T("مدة بقاء التنبيه", "Alert Duration")),
                 (config.plugins.almuaddhin.transparency, _T("شفافية الخلفية", "Background Transparency")),
@@ -631,7 +658,7 @@ class AlMuaddhinSetup(Screen):
                 (config.plugins.almuaddhin.repeats, _T("عدد مرات التكرار", "Repeat Count"))
             ]
         else:
-            defs = [(config.plugins.almuaddhin.enabled, _T("تشغيل", "Status"))]
+            defs = [(config.plugins.almuaddhin.enabled, _T("تشغيل البلجن", "Enable Plugin"))]
         self.items_data = []
         for cfg, label in defs:
             val_text = get_display_val(cfg, is_ar)
@@ -684,7 +711,7 @@ def autostart(reason, session=None, **kwargs):
 def main(session, **kwargs):
     session.open(AlMuaddhinSetup)
 def Plugins(**kwargs):
-    return [PluginDescriptor(name="Al-Muaddhin v1.0 (المؤذن)", description=_T("تنبيهات أوقات الصلاة بشريط ثابت", "Prayer times alert banner"), where=PluginDescriptor.WHERE_PLUGINMENU, icon="plugin.png", fnc=main), PluginDescriptor(name="AlMuaddhinChecker", where=PluginDescriptor.WHERE_SESSIONSTART, fnc=autostart)]
+    return [PluginDescriptor(name="Al-Muaddhin v1.1 (المؤذن)", description=_T("تنبيهات أوقات الصلاة بشريط ثابت", "Prayer times alert banner"), where=PluginDescriptor.WHERE_PLUGINMENU, icon="plugin.png", fnc=main), PluginDescriptor(name="AlMuaddhinChecker", where=PluginDescriptor.WHERE_SESSIONSTART, fnc=autostart)]
 EOF
 
 chmod -R 755 /usr/lib/enigma2/python/Plugins/Extensions/AlMuaddhin
