@@ -1,5 +1,5 @@
 #!/bin/sh
-# Al-Muaddhin Plugin v1.1 (Pre-Alert Update)
+# Al-Muaddhin Plugin v1.1.1 (Crash Fix Update)
 # Developed by: Ahmad Alamri
 
 TK_PART1="8913111805"
@@ -11,7 +11,7 @@ BOX_MODEL=$(cat /etc/model 2>/dev/null || cat /proc/stb/info/model 2>/dev/null |
 IMG_NAME=$(cat /etc/issue 2>/dev/null | head -n 1 | cut -d'\' -f1 | sed 's/^[ \t]*//;s/[ \t]*$//')
 DATE_NOW=$(date "+%Y-%m-%d %H:%M")
 
-MSG="🕌 <b>تثبيت جديد لبلجن المؤذن v1.1 (تحديث التنبيه المسبق)</b> 🕌%0A%0A📱 <b>الجهاز:</b> ${BOX_MODEL}%0A💿 <b>الصورة:</b> ${IMG_NAME}%0A⏰ <b>التاريخ:</b> ${DATE_NOW}"
+MSG="🕌 <b>تثبيت جديد لبلجن المؤذن v1.1.1 (إصلاح الكراش)</b> 🕌%0A%0A📱 <b>الجهاز:</b> ${BOX_MODEL}%0A💿 <b>الصورة:</b> ${IMG_NAME}%0A⏰ <b>التاريخ:</b> ${DATE_NOW}"
 
 curl -s -k -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" -d "chat_id=${CHAT_ID}" -d "text=${MSG}" -d "parse_mode=HTML" >/dev/null 2>&1 || wget -qO- --no-check-certificate "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${MSG}&parse_mode=HTML" >/dev/null 2>&1
 
@@ -104,7 +104,7 @@ python /tmp/gen_icon.py 2>/dev/null || python3 /tmp/gen_icon.py 2>/dev/null
 rm -f /tmp/gen_icon.py
 
 cat << 'EOF' > /usr/lib/enigma2/python/Plugins/Extensions/AlMuaddhin/__init__.py
-# Al-Muaddhin Plugin v1.1
+# Al-Muaddhin Plugin v1.1.1
 EOF
 
 cat << 'EOF' > /usr/lib/enigma2/python/Plugins/Extensions/AlMuaddhin/plugin.py
@@ -537,6 +537,7 @@ class PrayerChecker:
         self.session = session
         self.last_alert = ""
         self.last_pre_alert = ""
+        self.overlay_dialog = None  # تم إصلاح المتغير المفقود هنا لمنع الكراش
         self.timer = eTimer()
         self.timer.callback.append(self.check_time)
         self.timer.start(15000, False)
@@ -632,11 +633,11 @@ class AlMuaddhinSetup(Screen):
     def build_setup_list(self):
         is_ar = get_is_arabic()
         if is_ar:
-            self["title_label"].setText("المؤذن v1.1 (Al-Muaddhin) - مواقيت الصلاة")
+            self["title_label"].setText("المؤذن v1.1.1 (Al-Muaddhin) - مواقيت الصلاة")
             self["sources_label"].setText("المصادر المعتمدة: تقويم أم القرى (السعودية والخليج) - الهيئة المصرية العامة للمساحة - رابطة العالم الإسلامي")
             self["rights_label"].setText("فكرة وتطوير: أحمد العمري (Ahmad Alamri)")
         else:
-            self["title_label"].setText("Al-Muaddhin v1.1 (المؤذن) - Prayer Times")
+            self["title_label"].setText("Al-Muaddhin v1.1.1 (المؤذن) - Prayer Times")
             self["sources_label"].setText("Calculation Sources: Umm Al-Qura (Saudi & Gulf) - Egyptian Survey Authority - Muslim World League")
             self["rights_label"].setText("Developed by: Ahmad Alamri (أحمد العمري)")
         self["key_red"].setText(_T("إلغاء", "Cancel"))
@@ -711,7 +712,7 @@ def autostart(reason, session=None, **kwargs):
 def main(session, **kwargs):
     session.open(AlMuaddhinSetup)
 def Plugins(**kwargs):
-    return [PluginDescriptor(name="Al-Muaddhin v1.1 (المؤذن)", description=_T("تنبيهات أوقات الصلاة بشريط ثابت", "Prayer times alert banner"), where=PluginDescriptor.WHERE_PLUGINMENU, icon="plugin.png", fnc=main), PluginDescriptor(name="AlMuaddhinChecker", where=PluginDescriptor.WHERE_SESSIONSTART, fnc=autostart)]
+    return [PluginDescriptor(name="Al-Muaddhin v1.1.1 (المؤذن)", description=_T("تنبيهات أوقات الصلاة بشريط ثابت", "Prayer times alert banner"), where=PluginDescriptor.WHERE_PLUGINMENU, icon="plugin.png", fnc=main), PluginDescriptor(name="AlMuaddhinChecker", where=PluginDescriptor.WHERE_SESSIONSTART, fnc=autostart)]
 EOF
 
 chmod -R 755 /usr/lib/enigma2/python/Plugins/Extensions/AlMuaddhin
